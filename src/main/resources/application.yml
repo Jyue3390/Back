@@ -1,0 +1,15 @@
+server:
+  port: 9999            # 端口号
+spring:
+  datasource:
+    username: root      # 数据库用户名
+    password: "040925yu#"  # 数据库密码，# 被包含在引号中
+    url: jdbc:mysql:///xdb
+
+  redis:
+    port: 6379          # Redis 默认端口
+    host: localhost
+
+logging:
+  level:
+    com.ums: debug
