@@ -2,6 +2,7 @@ package com.ums.sys.service.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ums.sys.entity.User;
 import com.ums.sys.mapper.UserMapper;
 import com.ums.sys.service.IUserService;
@@ -27,6 +28,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -57,6 +60,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 并将用户信息存入redis
         return null;
     }
+
+    @Override
+    public boolean register(User user) {
+        // 检查用户名是否已存在
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", user.getUsername());
+        User existingUser = userMapper.selectOne(queryWrapper);
+
+        if (existingUser != null) {
+            return false; // 用户名已存在
+        }
+
+        // 不进行加密，直接使用原始密码
+        // user.setPassword(encodePassword(user.getPassword())); // 去掉密码加密
+
+        // 插入新用户记录
+        return userMapper.insert(user) > 0;
+    }
+
 
     @Override
     public Map<String, Object> getUserInfo(String token) {

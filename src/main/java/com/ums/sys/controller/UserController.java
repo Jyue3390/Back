@@ -44,6 +44,18 @@ public class UserController {
         return Result.fail(2002,"用户名或密码错误");
     }
 
+    @PostMapping("/register")
+    public Result<?> register(@RequestBody User user) {
+        // 调用业务层完成注册逻辑
+        boolean isRegistered = userService.register(user);
+
+        if (isRegistered) {
+            return Result.success("注册成功");
+        } else {
+            return Result.fail(2004, "注册失败，用户名可能已存在");
+        }
+    }
+
     @GetMapping("/info")
     public Result<Map<String,Object>> getUserInfo(@RequestParam("token") String token){
         // @RequestParam("token") 是从url中获取值
@@ -60,5 +72,6 @@ public class UserController {
         userService.logout(token);
         return Result.success();
     }
+
 }
 
