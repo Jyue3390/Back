@@ -10,21 +10,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/**
- * <p>
- *  服务实现类
- * </p>
- *
- * @author chenhao
- * @since 2023-06-16
- */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
@@ -35,7 +26,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Map<String, Object> login(User user) {
-        // 查询数据库
+        // 查询数据库，获取用户名和密码匹配的用户
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, user.getUsername());
         wrapper.eq(User::getPassword, user.getPassword());
@@ -47,19 +38,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             String key = "user:" + UUID.randomUUID();
 
             // 存入redis
-            loginUser.setPassword(null);    // 设置密码为空，密码没必要放入
-            redisTemplate.opsForValue().set(key, loginUser,30, TimeUnit.MINUTES);   // timeout为登录时间
+            loginUser.setPassword(null);  // 设置密码为空，密码没必要放入
+            redisTemplate.opsForValue().set(key, loginUser, 30, TimeUnit.MINUTES);  // timeout为登录时间
 
             // 返回数据
             Map<String, Object> data = new HashMap<>();
-            data.put("token",key);
+            data.put("token", key);  // 返回生成的 token
+            data.put("role", loginUser.getRole());  // 角色信息传到前端
             return data;
         }
 
-        // 结果不为空，生成token，前后端分离，前端无法使用session，可以使用token
-        // 并将用户信息存入redis
+        // 如果用户不存在，返回 null
         return null;
     }
+
 
     @Override
     public boolean register(User user) {
@@ -72,27 +64,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return false; // 用户名已存在
         }
 
-        // 不进行加密，直接使用原始密码
-        // user.setPassword(encodePassword(user.getPassword())); // 去掉密码加密
+        // 默认角色为 "editor"（可以根据需求调整）
+        user.setRole("editor");
 
         // 插入新用户记录
         return userMapper.insert(user) > 0;
     }
 
-
     @Override
     public Map<String, Object> getUserInfo(String token) {
-        // 之前已将对象进行序列化处理存入redis，现在从redis中取出需要反序列化处理
-        Object obj = redisTemplate.opsForValue().get(token);    // 此对象是map类型,稍后需要序列化为Json字符串
-        if (obj!= null) {
+        // 从redis中获取用户信息
+        Object obj = redisTemplate.opsForValue().get(token);
+        if (obj != null) {
             User loginUser = JSON.parseObject(JSON.toJSONString(obj), User.class);
-            Map<String,Object> data = new HashMap<>();
-            data.put("name",loginUser.getUsername());
-            data.put("avatar",loginUser.getAvatar());
-
-            // 先在xml里写SQL语句id=getRoleNameByUserId，然后去UserMapper里实现接口
-            List<String> roleList = this.baseMapper.getRoleNameByUserId(loginUser.getId());
-            data.put("roles",roleList);
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", loginUser.getUsername());
+            data.put("avatar", loginUser.getAvatar());
+            data.put("role", loginUser.getRole());  // 直接返回角色字符串
 
             return data;
         }
@@ -102,7 +90,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void logout(String token) {
-        redisTemplate.delete(token);    // 从redis中删除token
+        redisTemplate.delete(token);  // 从redis中删除token
     }
-
 }

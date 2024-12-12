@@ -1,18 +1,10 @@
 package com.ums.sys.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.IdType;
 import java.io.Serializable;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author anthony
- * @since 2024-12-08
- */
 @TableName("x_user")
 public class User implements Serializable {
 
@@ -35,6 +27,9 @@ public class User implements Serializable {
 
     private Integer deleted;
 
+    // 修改为 String 类型
+    private String role;
+
     public Integer getId() {
         return id;
     }
@@ -42,6 +37,7 @@ public class User implements Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
+
     public String getUsername() {
         return username;
     }
@@ -49,6 +45,7 @@ public class User implements Serializable {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public String getPassword() {
         return password;
     }
@@ -56,6 +53,7 @@ public class User implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+
     public String getEmail() {
         return email;
     }
@@ -63,6 +61,7 @@ public class User implements Serializable {
     public void setEmail(String email) {
         this.email = email;
     }
+
     public String getPhone() {
         return phone;
     }
@@ -70,6 +69,7 @@ public class User implements Serializable {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
     public Integer getStatus() {
         return status;
     }
@@ -77,6 +77,7 @@ public class User implements Serializable {
     public void setStatus(Integer status) {
         this.status = status;
     }
+
     public String getAvatar() {
         return avatar;
     }
@@ -84,6 +85,7 @@ public class User implements Serializable {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
     public Integer getDeleted() {
         return deleted;
     }
@@ -92,17 +94,30 @@ public class User implements Serializable {
         this.deleted = deleted;
     }
 
+    public String getRole() {
+        return role;
+    }
+    // 将 String 转为 Role 枚举
+    // 设置 role 字符串（直接设置为字符串）
+    public void setRole(String role) {
+        if (role != null) {
+            this.role = role.toLowerCase();  // 存储时将其转换为小写
+        }
+    }
+
+
     @Override
     public String toString() {
         return "User{" +
-            "id=" + id +
-            ", username=" + username +
-            ", password=" + password +
-            ", email=" + email +
-            ", phone=" + phone +
-            ", status=" + status +
-            ", avatar=" + avatar +
-            ", deleted=" + deleted +
-        "}";
+                "id=" + id +
+                ", username=" + username +
+                ", password=" + password +
+                ", role=" + role +
+                ", email=" + email +
+                ", phone=" + phone +
+                ", status=" + status +
+                ", avatar=" + avatar +
+                ", deleted=" + deleted +
+                "}";
     }
 }

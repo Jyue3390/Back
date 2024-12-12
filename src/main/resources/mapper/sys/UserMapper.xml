@@ -3,14 +3,15 @@
 <mapper namespace="com.ums.sys.mapper.UserMapper">
 
    <select id="getRoleNameByUserId" parameterType="Integer" resultType="String">
-        SELECT
-            b.role_name
-        FROM
-            x_user_role a,x_role b
-        WHERE
-            a.role_id=b.role_id
-          AND
-            a.user_id = #{userId}
+       SELECT
+           id,
+           username,
+           password,
+           role
+       FROM
+           x_user
+       WHERE
+           userID = #{userID}
     </select>
 
 
